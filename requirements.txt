@@ -1,0 +1,16 @@
+pandas
+scikit-learn
+imbalanced-learn
+xgboost
+shap
+joblib
+fastapi
+uvicorn[standard]
+httpx
+openai
+langgraph
+qdrant-client
+fastembed
+streamlit
+python-dotenv
+pytest

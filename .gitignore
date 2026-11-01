@@ -218,3 +218,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# CKD Care-Gap Agent: never upload these
+.env
+data/raw/
+data/processed/
+data/*.db
+models/
+synthea/
+qdrant_data/
