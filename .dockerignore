@@ -1,0 +1,8 @@
+.venv
+.git
+data
+synthea
+qdrant_data
+.env
+**/__pycache__
+.pytest_cache
