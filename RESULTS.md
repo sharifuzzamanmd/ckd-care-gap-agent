@@ -15,3 +15,10 @@
 - Simple rule (age 60+ OR diabetes OR high BP) flags 59%, catches 88.6%; model at same share catches 87.6%
 - Conclusion: model matches the rule at broad screening; its value is ranking who to test first
 - Fairness AUC: men 0.817, women 0.766; race/ethnicity groups 0.755 to 0.913 (small groups, wide uncertainty)
+
+## Step 4: Model API (FastAPI + SHAP), runs in Docker
+- Endpoints: GET /health, POST /score (risk, flag, top 5 reasons)
+- Example: 67-year-old woman with diabetes, HbA1c 8.1, high BP -> risk 0.481, flagged
+- Example: 32-year-old man, normal values -> risk 0.03, not flagged
+- Missing values are never shown as reasons
+- Docker image ckd-model-api; package versions pinned (added pyarrow)
