@@ -22,3 +22,10 @@
 - Example: 32-year-old man, normal values -> risk 0.03, not flagged
 - Missing values are never shown as reasons
 - Docker image ckd-model-api; package versions pinned (added pyarrow)
+
+## Step 5: Local Qwen note writer
+- Qwen3-4B (Docker Model Runner, vLLM backend) writes a 2-3 sentence clinician note from model facts only
+- Safety check: every number in the note must appear in the facts -> PASSED on test patient (2 runs)
+- Issue found: Qwen described hemoglobin 11.9 as "elevated" in one run and "normal" in another (it is slightly low).
+  The number check cannot catch wrong words, and wording varies between runs.
+- Fix planned for Step 8: label each fact (high / low / normal) before sending to Qwen; clinician approves every note
