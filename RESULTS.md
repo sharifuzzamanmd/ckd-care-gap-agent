@@ -29,3 +29,24 @@
 - Issue found: Qwen described hemoglobin 11.9 as "elevated" in one run and "normal" in another (it is slightly low).
   The number check cannot catch wrong words, and wording varies between runs.
 - Fix planned for Step 8: label each fact (high / low / normal) before sending to Qwen; clinician approves every note
+
+## Step 6: FHIR server and synthetic patients
+- HAPI FHIR server in Docker; Synthea: 364 patients aged 40-85 (300 living), seed 42
+- Loader slims each bundle to patients, visits, diagnoses, medicines and needed labs:
+  2.25 GB -> 0.17 GB; all 366 bundles loaded in 253 s, 0 failures; safe to rerun (no duplicates)
+- Care gaps among 300 living patients (scripts/summarize_patients.py, read back from the server):
+  kidney diagnosis on record 50 (17%) | lab CKD not diagnosed 1 (0%) | kidney tests overdue 58 (19%) | no gap 191 (64%)
+- Model inputs available: BP, BMI, hemoglobin 100%; potassium, sodium 83%; HbA1c 72%
+- Codes checked against the data; guide's table corrected: sodium/potassium also use 2947-0/2823-3,
+  BP is inside panel 85354-9, and kidney diagnoses include ESRD, diabetic kidney disease and transplant codes
+- Synthea data issues found:
+  1. Creatinine values do not match Synthea's own eGFR (median creatinine 2.5 mg/dL with eGFR ~85),
+     and hospital panels report eGFR in mL/min with values 5-15. Fix: use only lab-reported eGFR
+     in mL/min/1.73m2. Before the fix, ~60 healthy patients were wrongly flagged as undiagnosed CKD.
+  2. Synthea almost always records a CKD diagnosis when eGFR falls (1 undiagnosed case vs 85.7% in NHANES),
+     so it tests the "tests overdue" path well but the "undiagnosed" path barely. Unit tests cover that path.
+- Model on Synthea patients with overdue tests: top 5 all scored risk 1.00, top reasons sodium, age, potassium.
+  Only 0.1% of NHANES adults score that high. Causes: isotonic calibration's top step is 1.0, and Synthea's
+  lab values differ from NHANES (e.g., potassium higher, HbA1c as low as 2.3%). Scores on synthetic data are
+  not real risks; use them only to rank. Fix planned: cap or re-calibrate scores (model v2).
+- Tests: tests/test_patient_facts.py (13 passed)

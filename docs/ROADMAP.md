@@ -1,6 +1,6 @@
 # Roadmap
 
-Started: October 27, 2026 · Last updated: November 12, 2026
+Started: October 27, 2026 · Last updated: November 14, 2026
 
 Results for each finished item are in [RESULTS.md](../RESULTS.md).
 
@@ -15,16 +15,19 @@ Results for each finished item are in [RESULTS.md](../RESULTS.md).
 - [ ] Add XGBoost/LightGBM
 - [ ] Benchmark against KFRE
 - [ ] Apply NHANES survey weights
+- [ ] Fix calibration so scores never reach 1.00 (isotonic top step)
 
 ## Phase 2 — Synthetic patient records (weeks 4–8)
-- [ ] Generate FHIR patients with Synthea
-- [ ] Load them into a local HAPI FHIR server
+- [x] Generate FHIR patients with Synthea
+- [x] Load them into a local HAPI FHIR server
+- [x] Check the lab and diagnosis codes against the data
+- [ ] Add test patients with undiagnosed CKD (Synthea rarely produces them)
 
 ## Phase 3 — Agent and app (weeks 8–20)
 - [x] Model API (FastAPI): score + explanation, with tests and Docker
 - [x] Local LLM note writer with a number safety check (first piece of the agent)
 - [ ] Label each fact as high / low / normal before it reaches the LLM
-- [ ] Care-gap rules engine
+- [x] Care-gap rules: diagnosed, labs show CKD without diagnosis, kidney tests overdue
 - [ ] Agent: fetch → score → explain → guideline → draft → clinician approval
 - [ ] Clinician dashboard (React)
 
