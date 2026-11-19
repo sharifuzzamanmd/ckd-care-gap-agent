@@ -50,3 +50,10 @@
   lab values differ from NHANES (e.g., potassium higher, HbA1c as low as 2.3%). Scores on synthetic data are
   not real risks; use them only to rank. Fix planned: cap or re-calibrate scores (model v2).
 - Tests: tests/test_patient_facts.py (13 passed)
+
+## Step 7: Guideline search (RAG) with Qdrant
+- 9 guideline notes written in my own words (KDIGO 2024, ADA), stored in Qdrant with source citations
+- Retrieval test failed at first: "send a patient to a kidney specialist" returned the yearly-testing note
+- Debugging: storage and database were correct; the small embedding model (bge-small) scored all notes 0.65-0.73
+- Fix: topic-labeled notes + bge-base embedding model + query/passage embeddings -> referral note now ranks first (0.707 vs 0.668)
+- 4 automated retrieval tests added
