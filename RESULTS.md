@@ -76,3 +76,21 @@ Ran the agent on 100 Synthea patients:
 - Prompt tightening (example + "has / does not have" + code limit of 3 sentences) cut notes from 5-7 sentences to 2.
 - Found and fixed: for the lab-CKD patient (never scored), Qwen invented a "moderate" risk level. The number check could not catch it because it is a word. Fixed by stating "risk score not used" in the facts and adding a prompt rule. Also added low blood pressure labels (a diastolic of 39 mmHg was labeled normal).
 - Known limitation: the 4B model sometimes adds small extra reasoning or skips an abnormal value. Clinician approval and the shown evidence and citation cover this; LoRA fine-tuning is planned.
+
+## Step 8 Part B: Agent API and approval queue
+
+FastAPI service on port 8001:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /health` | API is alive |
+| `POST /run/{patient_id}` | Run the agent for one patient |
+| `POST /run_all?limit=N` | Run the agent for many patients |
+| `GET /queue?status=...` | Worklist, highest risk first |
+| `POST /queue/{id}/decision` | Clinician approves, edits or rejects |
+| `GET /patient/{patient_id}` | One patient's suggestions and decisions |
+
+- Every decision stores the time and a note (audit trail).
+- Tested by hand: approved items 29 and 34; a second decision on the same item returned 409 "Already decided".
+- Invalid input is refused: non-number item id, or a decision other than approved/edited/rejected (422).
+- Learned: in FHIR search results, the first `id` belongs to the Bundle (the envelope), not a patient. Patient IDs come after `"resourceType": "Patient"`.
