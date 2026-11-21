@@ -57,3 +57,22 @@
 - Debugging: storage and database were correct; the small embedding model (bge-small) scored all notes 0.65-0.73
 - Fix: topic-labeled notes + bge-base embedding model + query/passage embeddings -> referral note now ranks first (0.707 vs 0.668)
 - 4 automated retrieval tests added
+
+
+## Step 8 Part A: The agent (LangGraph)
+
+Ran the agent on 100 Synthea patients:
+
+| Result | Count |
+| --- | --- |
+| No gap | 63 |
+| Deceased (skipped) | 13 |
+| Kidney disease on record | 12 |
+| Kidney tests overdue | 11 |
+| Lab CKD not diagnosed | 1 |
+
+- Every note passed the cite-or-refuse safety check (no invented numbers).
+- Labeled facts (high/low/normal) stopped Qwen from mislabeling values.
+- Prompt tightening (example + "has / does not have" + code limit of 3 sentences) cut notes from 5-7 sentences to 2.
+- Found and fixed: for the lab-CKD patient (never scored), Qwen invented a "moderate" risk level. The number check could not catch it because it is a word. Fixed by stating "risk score not used" in the facts and adding a prompt rule. Also added low blood pressure labels (a diastolic of 39 mmHg was labeled normal).
+- Known limitation: the 4B model sometimes adds small extra reasoning or skips an abnormal value. Clinician approval and the shown evidence and citation cover this; LoRA fine-tuning is planned.
