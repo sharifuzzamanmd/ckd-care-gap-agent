@@ -14,3 +14,5 @@ fastembed
 streamlit
 python-dotenv
 pytest
+streamlit==1.66.1
+streamlit==1.66.1

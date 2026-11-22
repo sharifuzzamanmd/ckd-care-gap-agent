@@ -94,3 +94,14 @@ FastAPI service on port 8001:
 - Tested by hand: approved items 29 and 34; a second decision on the same item returned 409 "Already decided".
 - Invalid input is refused: non-number item id, or a decision other than approved/edited/rejected (422).
 - Learned: in FHIR search results, the first `id` belongs to the Bundle (the envelope), not a patient. Patient IDs come after `"resourceType": "Patient"`.
+
+## Step 9: Clinician dashboard (Streamlit)
+
+Web page on port 8501 that calls the agent API (port 8001):
+
+- Numbers: waiting for review, high risk waiting, approved, rejected.
+- Worklist sorted by risk; review panel with next step, AI note, evidence (abnormal values in red), SHAP reasons and cited guideline.
+- Approve / Edit and approve / Reject; edit and reject require a note.
+- Decisions tab shows the audit trail (decision, time, note).
+- Sidebar runs the agent for one patient or a batch.
+- Tested by hand: approved and rejected items; reject without a note was blocked; decisions appeared in the audit trail.
