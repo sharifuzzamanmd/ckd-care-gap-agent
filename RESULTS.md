@@ -105,3 +105,19 @@ Web page on port 8501 that calls the agent API (port 8001):
 - Decisions tab shows the audit trail (decision, time, note).
 - Sidebar runs the agent for one patient or a batch.
 - Tested by hand: approved and rejected items; reject without a note was blocked; decisions appeared in the audit trail.
+## Step 10: Docker Compose (whole system with one command)
+
+`docker compose up -d` starts 5 containers on one network; Qwen runs in Docker Model Runner.
+
+| Service | Image | Port |
+| --- | --- | --- |
+| fhir | hapiproject/hapi | 8080 |
+| qdrant | qdrant/qdrant | 6333 |
+| model-api | ckd-model-api | 8000 |
+| agent | ckd-agent-api | 8001 |
+| dashboard | ckd-dashboard | 8501 |
+
+- Services find each other by name (e.g. `http://fhir:8080/fhir`); Qwen is reached at `http://model-runner.docker.internal`.
+- Data that survives restarts: FHIR database (volume `fhir_data`), guidelines (`./qdrant_data`), approval queue (`./data`), embedding model cache (volume `fastembed_cache`).
+- Loaded 364 Synthea patients into the new FHIR server once.
+- Tested: scan of 20 patients from the dashboard ran inside Docker (2 care gaps, top risk 89%); earlier queue and decisions were kept; patients survived `docker compose down` / `up`.
