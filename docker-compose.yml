@@ -1,0 +1,56 @@
+name: ckd-care-gap-agent
+
+services:
+  fhir:                      # patient records (HAPI FHIR)
+    image: hapiproject/hapi:latest
+    user: root
+    ports: ["8080:8080"]
+    environment:
+      spring.datasource.url: jdbc:h2:file:/data/hapi   # keep the database in a volume
+    volumes:
+      - fhir_data:/data
+
+  qdrant:                    # guideline search
+    image: qdrant/qdrant
+    ports: ["6333:6333"]
+    volumes:
+      - ./qdrant_data:/qdrant/storage                 # the same folder you already use
+
+  model-api:                 # risk model + SHAP
+    build:
+      context: .
+      dockerfile: services/model_api/Dockerfile
+    image: ckd-model-api
+    ports: ["8000:8000"]
+
+  agent:                     # LangGraph agent + approval queue API
+    build:
+      context: .
+      dockerfile: services/agent/Dockerfile
+    image: ckd-agent-api
+    ports: ["8001:8001"]
+    environment:
+      FHIR_URL: http://fhir:8080/fhir
+      QDRANT_URL: http://qdrant:6333
+      MODEL_API_URL: http://model-api:8000
+      LLM_BASE_URL: http://model-runner.docker.internal/engines/v1
+      LLM_MODEL: huggingface.co/mlx-community/qwen3-4b-4bit:latest
+      AGENT_DB: data/agent.db
+    volumes:
+      - ./data:/app/data                              # the queue stays on your Mac
+      - fastembed_cache:/tmp/fastembed_cache          # embedding model downloads once
+    depends_on: [fhir, qdrant, model-api]
+
+  dashboard:                 # clinician screen
+    build:
+      context: .
+      dockerfile: services/dashboard/Dockerfile
+    image: ckd-dashboard
+    ports: ["8501:8501"]
+    environment:
+      AGENT_API_URL: http://agent:8001
+    depends_on: [agent]
+
+volumes:
+  fhir_data:
+  fastembed_cache:
